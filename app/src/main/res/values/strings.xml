@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Diary</string>
+    <string name="cardView_button">CardView Button</string>
+    <string name="cardView_Image">Cardview Image</string>
+    <string name="cardView_Title">Title</string>
+    <string name="cardView_Date">Date</string>
+    <string name="cardView_Location">Location</string>
+    <string name="main_memory">Memory</string>
+    <string name="main_title">Title</string>
+    <string name="main_location">Location</string>
+    <string name="main_date">Date</string>
+    <string name="add_button">Add New Memory</string>
+</resources>
