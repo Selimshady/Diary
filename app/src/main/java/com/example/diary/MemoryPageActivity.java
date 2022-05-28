@@ -3,7 +3,9 @@ package com.example.diary;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.opengl.Visibility;
 import android.os.Bundle;
+import android.text.Layout;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -17,9 +19,11 @@ public class MemoryPageActivity extends AppCompatActivity {
 
     ImageButton confirmButton,shareButton;
 
-    String date,location,mainText,title;
+    View emojiSelection;
+    ImageButton sadface,happyface,tiredface,angryface,lovingface;
+    //tired=0,happy=1,sad=2,angry=3,loving=4;
 
-    Memory oldMemory,newMemory;
+    int emotion = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,34 +38,79 @@ public class MemoryPageActivity extends AppCompatActivity {
         confirmButton = findViewById(R.id.confirmButton);
         shareButton = findViewById(R.id.shareButton);
 
+        emojiSelection = findViewById(R.id.emojiSelection);
+        sadface = findViewById(R.id.sad);
+        happyface = findViewById(R.id.happy);
+        tiredface = findViewById(R.id.tired);
+        angryface = findViewById(R.id.angry);
+        lovingface = findViewById(R.id.loving);
+
         getData();
 
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Memory newMemory = new Memory(editTextDate.getText().toString(),0,editLocation.getText().toString(),
-                        editTitle.getText().toString(),editMainText.getText().toString());
-                AppDatabase db = AppDatabase.getDbInstance(view.getContext());
-                if(oldMemory != null)
-                {
-                    db.memoryDao().delete(oldMemory);
-                }
-                db.memoryDao().insertMemory(newMemory);
+                emojiSelection.setVisibility(View.VISIBLE);
+            }
+        });
 
-                Intent intent = new Intent();
-                setResult(78,intent);
-                MemoryPageActivity.super.onBackPressed();
+        tiredface.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finishProcess(0);
+            }
+        });
+        happyface.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finishProcess(1);
+            }
+        });
+        sadface.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finishProcess(2);
+            }
+        });
+        angryface.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finishProcess(3);
+            }
+        });
+        lovingface.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finishProcess(4);
             }
         });
     }
 
+    private void finishProcess(int emotion)
+    {
+        emojiSelection.setVisibility(View.GONE);
+        Memory newMemory = new Memory(editTextDate.getText().toString(),emotion,editLocation.getText().toString(),
+                editTitle.getText().toString(),editMainText.getText().toString());
+
+        AppDatabase db = AppDatabase.getDbInstance(getApplicationContext());
+        if(getIntent().hasExtra("id")) {
+            db.memoryDao().update(newMemory.getDate(),newMemory.getEmotion(),newMemory.getLocation(),newMemory.getTitle(),
+                    newMemory.getMainText(),getIntent().getIntExtra("id",0));
+        }
+        else {
+            db.memoryDao().insertMemory(newMemory);
+        }
+        Intent intent = new Intent();
+        setResult(78,intent);
+        MemoryPageActivity.super.onBackPressed();
+    }
 
     private void getData()
     {
         if(getIntent().hasExtra("id"))
         {
             AppDatabase db = AppDatabase.getDbInstance(this.getApplicationContext());
-            oldMemory = db.memoryDao().getMemory(getIntent().getIntExtra("id",0));
+            Memory oldMemory = db.memoryDao().getMemory(getIntent().getIntExtra("id",0));
             editTitle.setText(oldMemory.getTitle());
             editLocation.setText(oldMemory.getLocation());
             editTextDate.setText(oldMemory.getDate());

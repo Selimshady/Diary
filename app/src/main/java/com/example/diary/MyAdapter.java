@@ -1,6 +1,7 @@
 package com.example.diary;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -22,8 +23,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     List<Memory> memories;
     Context context;
+    Activity mainActivity;
 
-    public MyAdapter(Context ct, List<Memory> memory) {
+    public MyAdapter(Activity mainActivity,Context ct, List<Memory> memory) {
+        this.mainActivity = mainActivity;
         context = ct;
         memories = memory;
     }
@@ -49,25 +52,25 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         switch (memories.get(position).getEmotion())
         {
             case 0:
-                holder.emotion.setImageResource(R.drawable.happyface);
-                break;
-            case 1:
-                holder.emotion.setImageResource(R.drawable.lovingface);
-                break;
-            case 2:
                 holder.emotion.setImageResource(R.drawable.tiredface);
                 break;
-            case 3:
+            case 1:
+                holder.emotion.setImageResource(R.drawable.happyface);
+                break;
+            case 2:
                 holder.emotion.setImageResource(R.drawable.sadface);
                 break;
-            case 4:
+            case 3:
                 holder.emotion.setImageResource(R.drawable.angryface);
+                break;
+            case 4:
+                holder.emotion.setImageResource(R.drawable.lovingface);
         }
 
         holder.mainLayout.setOnClickListener(view -> {
             Intent intent = new Intent(context, MemoryPageActivity.class);
             intent.putExtra("id",memories.get(position).getMid());
-            context.startActivity(intent);
+            mainActivity.startActivityForResult(intent,79);
         });
     }
 

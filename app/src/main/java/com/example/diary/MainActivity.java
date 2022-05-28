@@ -41,38 +41,50 @@ public class MainActivity extends AppCompatActivity {
     MyAdapter myAdapter;
     AppDatabase db;
 
-    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
+    public ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult( // For insert new Row
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    Log.e("geldi","geldi");
                     if(result.getResultCode() == 78)
                     {
+                        Log.i("Info:","Inserted");
                         myAdapter.setMemories(db.memoryDao().getAllMemories());
                     }
                 }
             });
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) { // For Update View
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 79)
+        {
+            Log.e("Info:","Updated");
+            myAdapter.setMemories(db.memoryDao().getAllMemories());
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        db = AppDatabase.getDbInstance(this);
+
         memories = new ArrayList<>();
 
         addButton = findViewById(R.id.addButton);
         recyclerView = findViewById(R.id.recyclerview);
-        myAdapter = new MyAdapter(this,memories);
+        myAdapter = new MyAdapter(MainActivity.this,this,memories);
         recyclerView.setAdapter(myAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        myAdapter.setMemories(memories = db.memoryDao().getAllMemories());
+        if(memories.isEmpty())
+        {
+            Toast.makeText(this, "No Memory Recorded Yet", Toast.LENGTH_SHORT).show();
+        }
 
         addButton.setOnClickListener(view -> someActivityResultLauncher.launch(new Intent(MainActivity.this,MemoryPageActivity.class)));
-
-        db = AppDatabase.getDbInstance(this);
-
-        myAdapter.setMemories(db.memoryDao().getAllMemories());
     }
 }

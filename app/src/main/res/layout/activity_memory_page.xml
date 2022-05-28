@@ -4,7 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MemoryPageActivity">
+    tools:context=".MemoryPageActivity"
+    android:id="@+id/memoryPage">
+
+    <include layout="@layout/emotion_select"/>
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/my_toolbar"

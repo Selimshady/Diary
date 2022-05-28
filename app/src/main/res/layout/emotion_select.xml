@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/emojiSelection"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone"
+    android:elevation="100dp"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="@color/cardview_light_background">
+
+    <TextView
+        android:id="@+id/info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/emoji_info"
+        app:layout_constraintTop_toBottomOf="@id/loving"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
+
+    <ImageButton
+        android:id="@+id/tired"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/tiredface"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/happy"
+        app:layout_constraintEnd_toStartOf="@id/sad"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="60dp"
+        android:contentDescription="@string/tired_face" />
+
+    <ImageButton
+        android:id="@+id/sad"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toEndOf="@id/tired"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/angry"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="30dp"
+        app:srcCompat="@drawable/sadface"
+        android:contentDescription="@string/sad_face"/>
+
+    <ImageButton
+        android:id="@+id/loving"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/lovingface"
+        app:layout_constraintTop_toBottomOf="@id/tired"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="60dp"
+        android:contentDescription="@string/loving_face"/>
+
+    <ImageButton
+        android:id="@+id/happy"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginStart="30dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/angry"
+        app:srcCompat="@drawable/happyface"
+        android:contentDescription="@string/loving_face"/>
+
+    <ImageButton
+        android:id="@+id/angry"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        app:srcCompat="@drawable/angryface"
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintStart_toEndOf="@id/happy"
+        android:contentDescription="@string/happy_face"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

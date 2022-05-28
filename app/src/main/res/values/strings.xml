@@ -10,4 +10,10 @@
     <string name="main_location">Location</string>
     <string name="main_date">Date</string>
     <string name="add_button">Add New Memory</string>
+    <string name="emoji_info">CHOOSE AN EMOTION FOR THE MEMORY</string>
+    <string name="tired_face">Tired</string>
+    <string name="happy_face">Happy</string>
+    <string name="sad_face">Sad</string>
+    <string name="loving_face">Loving</string>
+    <string name="angry_face">Angry</string>
 </resources>
