@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,6 +14,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -46,9 +50,8 @@ public class MainActivity extends AppCompatActivity {
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    if(result.getResultCode() == 78)
-                    {
-                        Log.i("Info:","Inserted");
+                    if (result.getResultCode() == 78) {
+                        Log.i("Info:", "Inserted");
                         myAdapter.setMemories(db.memoryDao().getAllMemories());
                     }
                 }
@@ -57,9 +60,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) { // For Update View
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 79)
-        {
-            Log.e("Info:","Updated");
+        if (requestCode == 79) {
+            Log.e("Info:", "Updated");
             myAdapter.setMemories(db.memoryDao().getAllMemories());
         }
     }
@@ -75,16 +77,16 @@ public class MainActivity extends AppCompatActivity {
 
         addButton = findViewById(R.id.addButton);
         recyclerView = findViewById(R.id.recyclerview);
-        myAdapter = new MyAdapter(MainActivity.this,this,memories);
+        myAdapter = new MyAdapter(MainActivity.this, this, memories);
         recyclerView.setAdapter(myAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         myAdapter.setMemories(memories = db.memoryDao().getAllMemories());
-        if(memories.isEmpty())
-        {
+        if (memories.isEmpty()) {
             Toast.makeText(this, "No Memory Recorded Yet", Toast.LENGTH_SHORT).show();
         }
 
-        addButton.setOnClickListener(view -> someActivityResultLauncher.launch(new Intent(MainActivity.this,MemoryPageActivity.class)));
+        addButton.setOnClickListener(view -> someActivityResultLauncher.launch(new Intent(MainActivity.this, MemoryPageActivity.class)));
+
     }
 }

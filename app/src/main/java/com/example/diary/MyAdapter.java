@@ -4,17 +4,23 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.diary.db.AppDatabase;
 import com.example.diary.db.Memory;
 
 import java.util.List;
@@ -72,21 +78,56 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             intent.putExtra("id",memories.get(position).getMid());
             mainActivity.startActivityForResult(intent,79);
         });
+
+        holder.mainLayout.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                PopupMenu popupMenu = new PopupMenu(context,holder.mainLayout);
+                popupMenu.inflate(R.menu.menu);
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.shareButton:
+                                share(position);
+                                break;
+                            case R.id.deleteButton:
+                                Log.e("geldi","geldi");
+                                delete(position);
+                                break;
+                        }
+                        return false;
+                    }
+                });
+                popupMenu.show();
+                return true;
+            }
+        });
+    }
+
+    private void share(int position)
+    {
+
+    }
+    private void delete(int position) {
+        AppDatabase db;
+        db = AppDatabase.getDbInstance(context);
+        db.memoryDao().delete(memories.get(position));
+        setMemories(db.memoryDao().getAllMemories());
     }
 
 
-    @Override
+        @Override
     public int getItemCount() {
         return memories.size();
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView title,date,location;
+        TextView title, date, location;
         ImageButton button;
         ImageView emotion;
         ConstraintLayout mainLayout;
-
 
 
         public MyViewHolder(@NonNull View itemView) {
@@ -94,7 +135,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             title = itemView.findViewById(R.id.title);
             date = itemView.findViewById(R.id.date);
             location = itemView.findViewById(R.id.location);
-            button = itemView.findViewById(R.id.button);
             emotion = itemView.findViewById(R.id.emotion);
             mainLayout = itemView.findViewById(R.id.mainLayout);
         }
