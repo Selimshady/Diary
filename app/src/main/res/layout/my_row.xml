@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:ignore="MissingConstraints"
-        android:backgroundTint="@android:color/holo_red_dark">
+        android:backgroundTint="@color/purple_200">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

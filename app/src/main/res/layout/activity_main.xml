@@ -4,14 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/black">
 
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/purple_200"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
@@ -28,6 +29,16 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints" />
 
+    <ImageButton
+        android:id="@+id/lockButton"
+        android:layout_width="66dp"
+        android:layout_height="55dp"
+        android:backgroundTint="@color/cardview_dark_background"
+        android:src="@drawable/ic_baseline_lock_24"
+        android:translationZ="10dp"
+        app:layout_constraintEnd_toStartOf="@id/addButton"
+        app:layout_constraintTop_toTopOf="parent"/>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
@@ -37,6 +48,9 @@
         app:layout_constraintTop_toBottomOf="@+id/my_toolbar">
 
     </androidx.recyclerview.widget.RecyclerView>
+
+    <include layout="@layout/password"/>
+    <include layout="@layout/createpassword"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

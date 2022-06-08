@@ -1,14 +1,18 @@
 package com.example.diary;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.content.Context;
 import android.content.Intent;
-import android.opengl.Visibility;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Layout;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.diary.db.AppDatabase;
 import com.example.diary.db.Memory;
@@ -23,7 +27,19 @@ public class MemoryPageActivity extends AppCompatActivity {
     ImageButton sadface,happyface,tiredface,angryface,lovingface;
     //tired=0,happy=1,sad=2,angry=3,loving=4;
 
+    ConstraintLayout newPasswordLayout;
+    Button enterNewPasswordButton;
+    Button cancelNewPasswordButton;
+
+    ConstraintLayout passwordLayout; //If there is password for memory
+    Button enterPasswordButton;
+    String password;
+
     int emotion = 0;
+
+    Memory oldMemory;
+
+    SharedPreferences sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,76 +61,124 @@ public class MemoryPageActivity extends AppCompatActivity {
         angryface = findViewById(R.id.angry);
         lovingface = findViewById(R.id.loving);
 
-        getData();
+        newPasswordLayout = findViewById(R.id.createPassword);
+        enterNewPasswordButton = findViewById(R.id.enter_newPassword);
+        cancelNewPasswordButton = findViewById(R.id.cancel_newPassword);
+        cancelNewPasswordButton.setVisibility(View.GONE);
 
-        confirmButton.setOnClickListener(new View.OnClickListener() {
+        passwordLayout = findViewById(R.id.password_layout);
+        enterPasswordButton = findViewById(R.id.enter_button);
+
+
+        sp = getApplicationContext().getSharedPreferences("MyUserPrefs", Context.MODE_PRIVATE);
+
+        if(getIntent().hasExtra("id"))
+        {
+            AppDatabase db = AppDatabase.getDbInstance(this.getApplicationContext());
+            oldMemory = db.memoryDao().getMemory(getIntent().getIntExtra("id", 0));
+            password = sp.getString(String.valueOf(oldMemory.getMid()), "");
+
+            if (!password.equals(""))
+            {
+                passwordLayout.setVisibility(View.VISIBLE);
+                confirmButton.setVisibility(View.GONE);
+                shareButton.setVisibility(View.GONE);
+            }
+            else
+            {
+                getData();
+            }
+        }
+
+        confirmButton.setOnClickListener(view -> emojiSelection.setVisibility(View.VISIBLE));
+
+        tiredface.setOnClickListener(view -> {
+            emotion = 0;
+            emojiSelection.setVisibility(View.GONE);
+            newPasswordLayout.setVisibility(View.VISIBLE);
+        });
+        happyface.setOnClickListener(view -> {
+            emotion = 1;
+            emojiSelection.setVisibility(View.GONE);
+            newPasswordLayout.setVisibility(View.VISIBLE);
+        });
+        sadface.setOnClickListener(view -> {
+            emotion = 2;
+            emojiSelection.setVisibility(View.GONE);
+            newPasswordLayout.setVisibility(View.VISIBLE);
+        });
+        angryface.setOnClickListener(view -> {
+            emotion = 3;
+            emojiSelection.setVisibility(View.GONE);
+            newPasswordLayout.setVisibility(View.VISIBLE);
+        });
+        lovingface.setOnClickListener(view -> {
+            emotion = 4;
+            emojiSelection.setVisibility(View.GONE);
+            newPasswordLayout.setVisibility(View.VISIBLE);
+        });
+
+        enterNewPasswordButton.setOnClickListener(new View.OnClickListener() {
+            final EditText editNewPassword = findViewById(R.id.newPassword);
+            final EditText editNewPasswordAgain = findViewById(R.id.newPasswordAgain);
             @Override
             public void onClick(View view) {
-                emojiSelection.setVisibility(View.VISIBLE);
+                if(editNewPassword.getText().toString().equals(editNewPasswordAgain.getText().toString()))
+                {
+                    newPasswordLayout.setVisibility(View.GONE);
+                    finishProcess(emotion,editNewPasswordAgain.getText().toString());
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(), "Passwords Do Not Match", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
-        tiredface.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finishProcess(0);
-            }
-        });
-        happyface.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finishProcess(1);
-            }
-        });
-        sadface.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finishProcess(2);
-            }
-        });
-        angryface.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finishProcess(3);
-            }
-        });
-        lovingface.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finishProcess(4);
+
+        enterPasswordButton.setOnClickListener(view -> { // Entering the app
+            EditText editPassword = findViewById(R.id.edit_password);
+            if(password.equals(editPassword.getText().toString()))
+            {
+                passwordLayout.setVisibility(View.GONE);
+                confirmButton.setVisibility(View.VISIBLE);
+                shareButton.setVisibility(View.VISIBLE);
+                getData();
             }
         });
     }
 
-    private void finishProcess(int emotion)
+    private void finishProcess(int emotion,String newPassword)
     {
-        emojiSelection.setVisibility(View.GONE);
         Memory newMemory = new Memory(editTextDate.getText().toString(),emotion,editLocation.getText().toString(),
                 editTitle.getText().toString(),editMainText.getText().toString());
 
+        SharedPreferences.Editor editor = sp.edit();
         AppDatabase db = AppDatabase.getDbInstance(getApplicationContext());
+
         if(getIntent().hasExtra("id")) {
             db.memoryDao().update(newMemory.getDate(),newMemory.getEmotion(),newMemory.getLocation(),newMemory.getTitle(),
                     newMemory.getMainText(),getIntent().getIntExtra("id",0));
+            editor.putString(String.valueOf(oldMemory.getMid()),newPassword);
         }
         else {
             db.memoryDao().insertMemory(newMemory);
+            editor.putString(String.valueOf(newMemory.getMid()),newPassword);
         }
+        editor.apply();
+
         Intent intent = new Intent();
         setResult(78,intent);
         MemoryPageActivity.super.onBackPressed();
     }
 
+
+
     private void getData()
     {
-        if(getIntent().hasExtra("id"))
-        {
-            AppDatabase db = AppDatabase.getDbInstance(this.getApplicationContext());
-            Memory oldMemory = db.memoryDao().getMemory(getIntent().getIntExtra("id",0));
-            editTitle.setText(oldMemory.getTitle());
-            editLocation.setText(oldMemory.getLocation());
-            editTextDate.setText(oldMemory.getDate());
-            editMainText.setText(oldMemory.getMainText());
-        }
+        editTitle.setText(oldMemory.getTitle());
+        editLocation.setText(oldMemory.getLocation());
+        editTextDate.setText(oldMemory.getDate());
+        editMainText.setText(oldMemory.getMainText());
     }
 }

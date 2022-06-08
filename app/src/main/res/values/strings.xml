@@ -16,4 +16,8 @@
     <string name="sad_face">Sad</string>
     <string name="loving_face">Loving</string>
     <string name="angry_face">Angry</string>
+    <string name="password">Password</string>
+    <string name="enter">Enter</string>
+    <string name="newPassword">New Password</string>
+    <string name="cancel">Cancel</string>
 </resources>
