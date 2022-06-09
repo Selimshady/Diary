@@ -4,14 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.text.Layout;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -79,35 +74,34 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             mainActivity.startActivityForResult(intent,79);
         });
 
-        holder.mainLayout.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                PopupMenu popupMenu = new PopupMenu(context,holder.mainLayout);
-                popupMenu.inflate(R.menu.menu);
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        switch (menuItem.getItemId()) {
-                            case R.id.shareButton:
-                                share(position);
-                                break;
-                            case R.id.deleteButton:
-                                Log.e("geldi","geldi");
-                                delete(position);
-                                break;
-                        }
-                        return false;
-                    }
-                });
-                popupMenu.show();
-                return true;
-            }
+        holder.mainLayout.setOnLongClickListener(view -> {
+            PopupMenu popupMenu = new PopupMenu(context,holder.mainLayout);
+            popupMenu.inflate(R.menu.menu);
+            popupMenu.setOnMenuItemClickListener(menuItem -> {
+                switch (menuItem.getItemId()) {
+                    case R.id.shareButton:
+                        share(position);
+                        break;
+                    case R.id.deleteButton:
+                        delete(position);
+                        break;
+                }
+                return false;
+            });
+            popupMenu.show();
+            return true;
         });
     }
 
     private void share(int position)
     {
-
+        String memo = memories.get(position).getTitle() + "\n" + memories.get(position).getLocation() + " - " +
+                memories.get(position).getDate() + "\n" + memories.get(position).getMainText();
+        memo += "Sent via Diary App";
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("text/plain");
+        share.putExtra(Intent.EXTRA_TEXT,memo);
+        context.startActivity(share);
     }
     private void delete(int position) {
         AppDatabase db;
@@ -125,7 +119,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView title, date, location;
-        ImageButton button;
         ImageView emotion;
         ConstraintLayout mainLayout;
 

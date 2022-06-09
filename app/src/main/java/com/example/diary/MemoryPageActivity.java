@@ -17,6 +17,9 @@ import android.widget.Toast;
 import com.example.diary.db.AppDatabase;
 import com.example.diary.db.Memory;
 
+import java.text.DateFormat;
+import java.util.Calendar;
+
 public class MemoryPageActivity extends AppCompatActivity {
 
     TextView editTextDate, editLocation, editMainText, editTitle;
@@ -89,6 +92,12 @@ public class MemoryPageActivity extends AppCompatActivity {
                 getData();
             }
         }
+        else
+        {
+            Calendar calendar = Calendar.getInstance();
+            String currentDate = DateFormat.getDateInstance().format(calendar.getTime());
+            editTextDate.setText(currentDate);
+        }
 
         confirmButton.setOnClickListener(view -> emojiSelection.setVisibility(View.VISIBLE));
 
@@ -146,6 +155,17 @@ public class MemoryPageActivity extends AppCompatActivity {
                 getData();
             }
         });
+
+
+        shareButton.setOnClickListener(view -> {
+            String memo = editTitle.getText().toString() + "\n" + editLocation.getText().toString() + " - " + editTextDate.getText().toString() + "\n" +
+                    editMainText.getText().toString();
+            memo += "Sent via Diary App";
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("text/plain");
+            share.putExtra(Intent.EXTRA_TEXT,memo);
+            startActivity(share);
+        });
     }
 
     private void finishProcess(int emotion,String newPassword)
@@ -160,10 +180,12 @@ public class MemoryPageActivity extends AppCompatActivity {
             db.memoryDao().update(newMemory.getDate(),newMemory.getEmotion(),newMemory.getLocation(),newMemory.getTitle(),
                     newMemory.getMainText(),getIntent().getIntExtra("id",0));
             editor.putString(String.valueOf(oldMemory.getMid()),newPassword);
+            Toast.makeText(this, "Memory Updated" ,Toast.LENGTH_SHORT).show();
         }
         else {
             db.memoryDao().insertMemory(newMemory);
             editor.putString(String.valueOf(newMemory.getMid()),newPassword);
+            Toast.makeText(this, "New Memory Added" ,Toast.LENGTH_SHORT).show();
         }
         editor.apply();
 

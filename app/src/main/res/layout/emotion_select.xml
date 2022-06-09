@@ -9,7 +9,7 @@
     android:elevation="100dp"
     android:focusable="true"
     android:clickable="true"
-    android:background="@color/cardview_light_background">
+    android:background="@color/black">
 
     <TextView
         android:id="@+id/info"
