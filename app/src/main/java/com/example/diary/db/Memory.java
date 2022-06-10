@@ -15,17 +15,21 @@ public class Memory {
     String date;
     @ColumnInfo(name = "Emotion")
     int emotion;
-    @ColumnInfo(name = "Location")
-    String location;
+    @ColumnInfo(name = "Latitude")
+    String latitude;
+    @ColumnInfo(name = "Longitude")
+    String longitude;
     @ColumnInfo(name = "Title")
     String title;
     @ColumnInfo(name = "Memory")
     String mainText;
 
-    public Memory(String date, int emotion, String location, String title, String mainText) {
+
+    public Memory(String date, int emotion, String latitude,String longitude, String title, String mainText) {
         this.date = date;
         this.emotion = emotion;
-        this.location = location;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.title = title;
         this.mainText = mainText;
     }
@@ -46,13 +50,13 @@ public class Memory {
         this.emotion = emotion;
     }
 
-    public String getLocation() {
-        return location;
-    }
+    public String getLatitude() { return latitude; }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+    public void setLatitude(String latitude) { this.latitude = latitude;}
+
+    public String getLongitude() { return longitude; }
+
+    public void setLongitude(String longitude) { this.longitude = longitude;}
 
     public String getTitle() {
         return title;

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.diary.db.AppDatabase;
 import com.example.diary.db.Memory;
 
+import java.io.IOException;
 import java.util.List;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
@@ -26,10 +29,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     Context context;
     Activity mainActivity;
 
+    private final Geocoder geocoder;
+
+
     public MyAdapter(Activity mainActivity,Context ct, List<Memory> memory) {
         this.mainActivity = mainActivity;
         context = ct;
         memories = memory;
+        geocoder = new Geocoder(context);
     }
 
     public void setMemories(List<Memory> memories) {
@@ -45,11 +52,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         return new MyViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
         holder.title.setText(memories.get(position).getTitle());
         holder.date.setText(memories.get(position).getDate());
-        holder.location.setText(memories.get(position).getLocation());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(Long.parseLong(memories.get(position).getLatitude()),Long.parseLong(memories.get(position).getLongitude()),1);
+            if(addresses.size() > 0) {
+                Address address = addresses.get(0);
+                holder.location.setText(address.getCountryName() + "/" + address.getAdminArea());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         switch (memories.get(position).getEmotion())
         {
             case 0:
@@ -95,9 +111,18 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     private void share(int position)
     {
-        String memo = memories.get(position).getTitle() + "\n" + memories.get(position).getLocation() + " - " +
-                memories.get(position).getDate() + "\n" + memories.get(position).getMainText();
-        memo += "Sent via Diary App";
+        String memo = memories.get(position).getTitle() + "\n";
+        try {
+            List<Address> addresses = geocoder.getFromLocation(Long.parseLong(memories.get(position).getLatitude()),Long.parseLong(memories.get(position).getLongitude()),1);
+            if(addresses.size() > 0) {
+                Address address = addresses.get(0);
+                memo+=address.getCountryName() + "/" + address.getAdminArea() + "\n";
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        memo += memories.get(position).getDate() + "\n" + memories.get(position).getMainText();
+        memo += "\nSent via Diary App";
         Intent share = new Intent(Intent.ACTION_SEND);
         share.setType("text/plain");
         share.putExtra(Intent.EXTRA_TEXT,memo);

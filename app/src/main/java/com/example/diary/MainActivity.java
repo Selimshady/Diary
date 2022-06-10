@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     MyAdapter myAdapter;
     AppDatabase db;
 
-
     String password;
 
     ConstraintLayout passwordLayout; //If there is password for app

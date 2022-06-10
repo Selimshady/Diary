@@ -23,8 +23,8 @@ public interface MemoryDao {
     @Delete
     void delete(Memory memory);
 
-    @Query("UPDATE memory SET date = :date, emotion = :emotion, location =:location, title =:title, " +
+    @Query("UPDATE memory SET emotion = :emotion, latitude = :latitude, longitude = :longitude, title =:title, " +
             "memory =:memory  WHERE mid =:id")
-    void update(String date, int emotion, String location, String title, String memory, int id );
+    void update(String date, int emotion, String latitude, String longitude, String title, String memory, int id );
 
 }

@@ -20,4 +20,6 @@
     <string name="enter">Enter</string>
     <string name="newPassword">New Password</string>
     <string name="cancel">Cancel</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="confirm_button">Confirm</string>
 </resources>

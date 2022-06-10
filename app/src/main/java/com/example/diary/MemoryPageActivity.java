@@ -1,12 +1,21 @@
 package com.example.diary;
 
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,8 +26,10 @@ import android.widget.Toast;
 import com.example.diary.db.AppDatabase;
 import com.example.diary.db.Memory;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.List;
 
 public class MemoryPageActivity extends AppCompatActivity {
 
@@ -43,6 +54,38 @@ public class MemoryPageActivity extends AppCompatActivity {
     Memory oldMemory;
 
     SharedPreferences sp;
+
+    Geocoder geocoder;
+    String longitude,latitude;
+
+    public ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult( // For insert new Row
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @SuppressLint("SetTextI18n")
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == 18) {
+                        assert result.getData() != null;
+                        latitude = result.getData().getStringExtra("LATITUDE");
+                        longitude = result.getData().getStringExtra("LONGITUDE");
+                        try {
+                            List<Address> addresses = geocoder.getFromLocation(Long.parseLong(latitude),Long.parseLong(longitude),1);
+                            if(addresses.size() > 0) {
+                                Address address = addresses.get(0);
+                                editLocation.setText(address.getCountryName() + "/" + address.getAdminArea());
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        if(!editLocation.getText().toString().equals(""))
+                        {
+                            editLocation.setEnabled(false);
+                            editLocation.setInputType(InputType.TYPE_NULL);
+                        }
+                    }
+                }
+            });
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +115,9 @@ public class MemoryPageActivity extends AppCompatActivity {
         passwordLayout = findViewById(R.id.password_layout);
         enterPasswordButton = findViewById(R.id.enter_button);
 
+        geocoder = new Geocoder(this);
+        longitude = "";
+        latitude = "";
 
         sp = getApplicationContext().getSharedPreferences("MyUserPrefs", Context.MODE_PRIVATE);
 
@@ -99,7 +145,11 @@ public class MemoryPageActivity extends AppCompatActivity {
             editTextDate.setText(currentDate);
         }
 
-        confirmButton.setOnClickListener(view -> emojiSelection.setVisibility(View.VISIBLE));
+        confirmButton.setOnClickListener(view -> {
+            emojiSelection.setVisibility(View.VISIBLE);
+            confirmButton.setVisibility(View.GONE);
+            shareButton.setVisibility(View.GONE);
+        });
 
         tiredface.setOnClickListener(view -> {
             emotion = 0;
@@ -135,6 +185,8 @@ public class MemoryPageActivity extends AppCompatActivity {
                 if(editNewPassword.getText().toString().equals(editNewPasswordAgain.getText().toString()))
                 {
                     newPasswordLayout.setVisibility(View.GONE);
+                    confirmButton.setVisibility(View.VISIBLE);
+                    shareButton.setVisibility(View.VISIBLE);
                     finishProcess(emotion,editNewPasswordAgain.getText().toString());
                 }
                 else
@@ -160,24 +212,33 @@ public class MemoryPageActivity extends AppCompatActivity {
         shareButton.setOnClickListener(view -> {
             String memo = editTitle.getText().toString() + "\n" + editLocation.getText().toString() + " - " + editTextDate.getText().toString() + "\n" +
                     editMainText.getText().toString();
-            memo += "Sent via Diary App";
+            memo += "\nSent via Diary App";
             Intent share = new Intent(Intent.ACTION_SEND);
             share.setType("text/plain");
             share.putExtra(Intent.EXTRA_TEXT,memo);
+
             startActivity(share);
         });
+
+        if(!editLocation.getText().toString().equals(""))
+        {
+            editLocation.setEnabled(false);
+            editLocation.setInputType(InputType.TYPE_NULL);
+        }
+
+        editLocation.setOnClickListener(view -> someActivityResultLauncher.launch(new Intent(MemoryPageActivity.this, MapsActivity.class)));
     }
 
     private void finishProcess(int emotion,String newPassword)
     {
-        Memory newMemory = new Memory(editTextDate.getText().toString(),emotion,editLocation.getText().toString(),
+        Memory newMemory = new Memory(editTextDate.getText().toString(),emotion,latitude,longitude,
                 editTitle.getText().toString(),editMainText.getText().toString());
 
         SharedPreferences.Editor editor = sp.edit();
         AppDatabase db = AppDatabase.getDbInstance(getApplicationContext());
 
         if(getIntent().hasExtra("id")) {
-            db.memoryDao().update(newMemory.getDate(),newMemory.getEmotion(),newMemory.getLocation(),newMemory.getTitle(),
+            db.memoryDao().update(newMemory.getDate(),newMemory.getEmotion(),latitude,longitude,newMemory.getTitle(),
                     newMemory.getMainText(),getIntent().getIntExtra("id",0));
             editor.putString(String.valueOf(oldMemory.getMid()),newPassword);
             Toast.makeText(this, "Memory Updated" ,Toast.LENGTH_SHORT).show();
@@ -195,12 +256,22 @@ public class MemoryPageActivity extends AppCompatActivity {
     }
 
 
-
+    @SuppressLint("SetTextI18n")
     private void getData()
     {
         editTitle.setText(oldMemory.getTitle());
-        editLocation.setText(oldMemory.getLocation());
         editTextDate.setText(oldMemory.getDate());
         editMainText.setText(oldMemory.getMainText());
+
+        try {
+            List<Address> addresses = geocoder.getFromLocation(Long.parseLong(latitude),Long.parseLong(longitude),1);
+            if(addresses.size() > 0) {
+                Address address = addresses.get(0);
+                editLocation.setText(address.getCountryName() + "/" + address.getAdminArea());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 }
