@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     List<Memory> memories;
 
-    ImageButton addButton;
+    ImageButton addButton,showAllButton;
 
     MyAdapter myAdapter;
     AppDatabase db;
@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == 78) {
-                        Log.i("Info:", "Inserted");
                         myAdapter.setMemories(db.memoryDao().getAllMemories());
                     }
                 }
@@ -64,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) { // For Update View
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 79) {
-            Log.e("Info:", "Updated");
             myAdapter.setMemories(db.memoryDao().getAllMemories());
         }
     }
@@ -91,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
         cancelNewPasswordButton = findViewById(R.id.cancel_newPassword);
 
         createNewLockButton = findViewById(R.id.lockButton);
+
+        showAllButton = findViewById(R.id.showAllButton);
 
 
         myAdapter = new MyAdapter(MainActivity.this, this, memories);
@@ -163,6 +163,13 @@ public class MainActivity extends AppCompatActivity {
                 newPasswordLayout.setVisibility(View.GONE);
                 editNewPassword.setText("");
                 editNewPasswordAgain.setText("");
+            }
+        });
+
+        showAllButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                someActivityResultLauncher.launch(new Intent(MainActivity.this,AllMemoriesActivity.class));
             }
         });
 

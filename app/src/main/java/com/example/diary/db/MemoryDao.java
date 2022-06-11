@@ -25,6 +25,6 @@ public interface MemoryDao {
 
     @Query("UPDATE memory SET emotion = :emotion, latitude = :latitude, longitude = :longitude, title =:title, " +
             "memory =:memory  WHERE mid =:id")
-    void update(String date, int emotion, String latitude, String longitude, String title, String memory, int id );
+    void update(int emotion, String latitude, String longitude, String title, String memory, int id );
 
 }

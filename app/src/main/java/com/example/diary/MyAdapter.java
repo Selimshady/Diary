@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         this.mainActivity = mainActivity;
         context = ct;
         memories = memory;
-        geocoder = new Geocoder(context);
+        geocoder = new Geocoder(ct);
     }
 
     public void setMemories(List<Memory> memories) {
@@ -52,13 +53,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         return new MyViewHolder(view);
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
         holder.title.setText(memories.get(position).getTitle());
         holder.date.setText(memories.get(position).getDate());
+
         try {
-            List<Address> addresses = geocoder.getFromLocation(Long.parseLong(memories.get(position).getLatitude()),Long.parseLong(memories.get(position).getLongitude()),1);
+            List<Address> addresses = geocoder.getFromLocation(Double.parseDouble(memories.get(position).getLatitude()),Double.parseDouble(memories.get(position).getLongitude()),1);
             if(addresses.size() > 0) {
                 Address address = addresses.get(0);
                 holder.location.setText(address.getCountryName() + "/" + address.getAdminArea());
@@ -113,7 +114,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     {
         String memo = memories.get(position).getTitle() + "\n";
         try {
-            List<Address> addresses = geocoder.getFromLocation(Long.parseLong(memories.get(position).getLatitude()),Long.parseLong(memories.get(position).getLongitude()),1);
+            List<Address> addresses = geocoder.getFromLocation(Double.parseDouble(memories.get(position).getLatitude()),Double.parseDouble(memories.get(position).getLongitude()),1);
             if(addresses.size() > 0) {
                 Address address = addresses.get(0);
                 memo+=address.getCountryName() + "/" + address.getAdminArea() + "\n";
@@ -134,7 +135,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         db.memoryDao().delete(memories.get(position));
         setMemories(db.memoryDao().getAllMemories());
     }
-
 
         @Override
     public int getItemCount() {

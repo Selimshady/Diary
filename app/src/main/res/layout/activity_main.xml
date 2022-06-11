@@ -39,13 +39,24 @@
         app:layout_constraintEnd_toStartOf="@id/addButton"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <ImageButton
+        android:id="@+id/showAllButton"
+        android:layout_width="66dp"
+        android:layout_height="55dp"
+        android:backgroundTint="@color/cardview_dark_background"
+        android:src="@drawable/ic_baseline_location_city_24"
+        android:translationZ="10dp"
+        app:layout_constraintEnd_toStartOf="@id/lockButton"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/my_toolbar">
+        app:layout_constraintTop_toBottomOf="@+id/my_toolbar"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="43dp">
 
     </androidx.recyclerview.widget.RecyclerView>
 

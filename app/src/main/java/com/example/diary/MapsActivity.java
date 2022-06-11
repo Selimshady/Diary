@@ -28,19 +28,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ,GoogleMap.OnMarkerDragListener{
 
     private GoogleMap mMap;
-
     private Geocoder geocoder;
-
     Button confirmButton;
-
     String latitude,longitude;
+    ActivityMapsBinding binding;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -48,9 +46,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
-        geocoder = new Geocoder(this);
+        geocoder = new Geocoder(getApplicationContext());
 
         confirmButton = findViewById(R.id.confirm_location);
+
+        latitude = "";
+        longitude = "";
 
         confirmButton.setOnClickListener(view -> {
             Intent intent = new Intent();
@@ -72,22 +73,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
+    public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerDragListener(this);
 
+
+        List<Address> addressList = null;
         try {
-            List<Address> addressList = geocoder.getFromLocationName("İstanbul",1);
+            addressList = geocoder.getFromLocationName("İstanbul",1);
             if(addressList.size() > 0)
             {
                 Address address = addressList.get(0);
                 LatLng latLng = new LatLng(address.getLatitude(),address.getLongitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,6 +100,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         try {
             List<Address> addresses = geocoder.getFromLocation(latLng.latitude,latLng.longitude,1);
             if(addresses.size() > 0) {
+                latitude = String.valueOf(latLng.latitude);
+                longitude = String.valueOf(latLng.longitude);
                 Address address = addresses.get(0);
                 String streetAdress = address.getAddressLine(0);
                 mMap.addMarker(new MarkerOptions().position(latLng).title(streetAdress).draggable(true));

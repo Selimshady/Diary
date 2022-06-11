@@ -16,6 +16,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -66,10 +67,10 @@ public class MemoryPageActivity extends AppCompatActivity {
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == 18) {
                         assert result.getData() != null;
-                        latitude = result.getData().getStringExtra("LATITUDE");
-                        longitude = result.getData().getStringExtra("LONGITUDE");
+                        latitude = result.getData().getStringExtra("LATITUDE"); // engellendi null üretmeyecek
+                        longitude = result.getData().getStringExtra("LONGITUDE"); // engellendi null üretmeyecek
                         try {
-                            List<Address> addresses = geocoder.getFromLocation(Long.parseLong(latitude),Long.parseLong(longitude),1);
+                            List<Address> addresses = geocoder.getFromLocation(Double.parseDouble(latitude),Double.parseDouble(longitude),1);
                             if(addresses.size() > 0) {
                                 Address address = addresses.get(0);
                                 editLocation.setText(address.getCountryName() + "/" + address.getAdminArea());
@@ -116,8 +117,6 @@ public class MemoryPageActivity extends AppCompatActivity {
         enterPasswordButton = findViewById(R.id.enter_button);
 
         geocoder = new Geocoder(this);
-        longitude = "";
-        latitude = "";
 
         sp = getApplicationContext().getSharedPreferences("MyUserPrefs", Context.MODE_PRIVATE);
 
@@ -143,12 +142,22 @@ public class MemoryPageActivity extends AppCompatActivity {
             Calendar calendar = Calendar.getInstance();
             String currentDate = DateFormat.getDateInstance().format(calendar.getTime());
             editTextDate.setText(currentDate);
+
+            longitude = "";
+            latitude = "";
         }
 
         confirmButton.setOnClickListener(view -> {
-            emojiSelection.setVisibility(View.VISIBLE);
-            confirmButton.setVisibility(View.GONE);
-            shareButton.setVisibility(View.GONE);
+            if(editLocation.getText().toString().equals(""))
+            {
+                Toast.makeText(getApplicationContext(), "Please add a location(Double Tap)", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                emojiSelection.setVisibility(View.VISIBLE);
+                confirmButton.setVisibility(View.GONE);
+                shareButton.setVisibility(View.GONE);
+            }
         });
 
         tiredface.setOnClickListener(view -> {
@@ -220,12 +229,6 @@ public class MemoryPageActivity extends AppCompatActivity {
             startActivity(share);
         });
 
-        if(!editLocation.getText().toString().equals(""))
-        {
-            editLocation.setEnabled(false);
-            editLocation.setInputType(InputType.TYPE_NULL);
-        }
-
         editLocation.setOnClickListener(view -> someActivityResultLauncher.launch(new Intent(MemoryPageActivity.this, MapsActivity.class)));
     }
 
@@ -238,14 +241,15 @@ public class MemoryPageActivity extends AppCompatActivity {
         AppDatabase db = AppDatabase.getDbInstance(getApplicationContext());
 
         if(getIntent().hasExtra("id")) {
-            db.memoryDao().update(newMemory.getDate(),newMemory.getEmotion(),latitude,longitude,newMemory.getTitle(),
+            db.memoryDao().update(newMemory.getEmotion(),latitude,longitude,newMemory.getTitle(),
                     newMemory.getMainText(),getIntent().getIntExtra("id",0));
             editor.putString(String.valueOf(oldMemory.getMid()),newPassword);
             Toast.makeText(this, "Memory Updated" ,Toast.LENGTH_SHORT).show();
         }
         else {
             db.memoryDao().insertMemory(newMemory);
-            editor.putString(String.valueOf(newMemory.getMid()),newPassword);
+            List<Memory> memories = db.memoryDao().getAllMemories(); // to extract the id of most inserted memory. We would be getting it from mid if it was not new.
+            editor.putString(String.valueOf(memories.get(memories.size()-1).getMid()),newPassword);
             Toast.makeText(this, "New Memory Added" ,Toast.LENGTH_SHORT).show();
         }
         editor.apply();
@@ -255,19 +259,26 @@ public class MemoryPageActivity extends AppCompatActivity {
         MemoryPageActivity.super.onBackPressed();
     }
 
-
     @SuppressLint("SetTextI18n")
     private void getData()
     {
         editTitle.setText(oldMemory.getTitle());
         editTextDate.setText(oldMemory.getDate());
         editMainText.setText(oldMemory.getMainText());
-
+        longitude = oldMemory.getLongitude();
+        latitude = oldMemory.getLatitude();
         try {
-            List<Address> addresses = geocoder.getFromLocation(Long.parseLong(latitude),Long.parseLong(longitude),1);
+            List<Address> addresses = geocoder.getFromLocation(Double.parseDouble(latitude),Double.parseDouble(longitude),1);
             if(addresses.size() > 0) {
                 Address address = addresses.get(0);
                 editLocation.setText(address.getCountryName() + "/" + address.getAdminArea());
+
+                if(!editLocation.getText().toString().equals(""))
+                {
+                    editLocation.setEnabled(false);
+                    editLocation.setInputType(InputType.TYPE_NULL);
+                }
+
             }
         } catch (IOException e) {
             e.printStackTrace();
