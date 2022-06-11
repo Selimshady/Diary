@@ -1,20 +1,20 @@
 package com.example.diary;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,12 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
     public ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult( // For insert new Row
             new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
-                @Override
-                public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == 78) {
-                        myAdapter.setMemories(db.memoryDao().getAllMemories());
-                    }
+            result -> {
+                if (result.getResultCode() == 78) {
+                    Update();
                 }
             });
 
@@ -63,8 +60,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) { // For Update View
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 79) {
-            myAdapter.setMemories(db.memoryDao().getAllMemories());
+            Update();
         }
+    }
+
+    public void Update()
+    {
+        memories = db.memoryDao().getAllMemories();
+        myAdapter.setMemories(memories);
     }
 
     @Override
@@ -166,12 +169,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        showAllButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        showAllButton.setOnClickListener(view -> {
+            Update();
+            if(memories.size()>0)
+            {
                 someActivityResultLauncher.launch(new Intent(MainActivity.this,AllMemoriesActivity.class));
             }
+            else
+                Toast.makeText(MainActivity.this, "No Memory Found", Toast.LENGTH_SHORT).show();
         });
 
     }
+
 }

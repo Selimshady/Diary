@@ -1,7 +1,12 @@
 package com.example.diary;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.example.diary.db.AppDatabase;
@@ -10,6 +15,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.diary.databinding.ActivityAllMemoriesBinding;
@@ -60,7 +67,26 @@ public class AllMemoriesActivity extends FragmentActivity implements OnMapReadyC
         for(Memory memo: memories)
         {
             LatLng latLng = new LatLng(Double.parseDouble(memo.getLatitude()),Double.parseDouble(memo.getLongitude()));
-            mMap.addMarker(new MarkerOptions().position(latLng).title(memo.getTitle()));
+            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(memo.getTitle());
+
+            switch (memo.getEmotion())
+            {
+                case 0:
+                    markerOptions.icon(BitmapFromVector(this,R.drawable.tiredface));
+                    break;
+                case 1:
+                    markerOptions.icon(BitmapFromVector(this,R.drawable.happyface));
+                    break;
+                case 2:
+                    markerOptions.icon(BitmapFromVector(this,R.drawable.sadface));
+                    break;
+                case 3:
+                    markerOptions.icon(BitmapFromVector(this,R.drawable.angryface));
+                    break;
+                case 4:
+                    markerOptions.icon(BitmapFromVector(this,R.drawable.lovingface));
+            }
+            mMap.addMarker(markerOptions);
             x+=latLng.latitude;
             y+=latLng.longitude;
         }
@@ -69,6 +95,27 @@ public class AllMemoriesActivity extends FragmentActivity implements OnMapReadyC
         y/=memories.size();
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(x,y),16));
+    }
 
+    private BitmapDescriptor BitmapFromVector(Context context, int vectorResId) {
+        // below line is use to generate a drawable.
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+
+        // below line is use to set bounds to our vector drawable.
+        vectorDrawable.setBounds(0, 0, 100, 100);
+
+        // below line is use to create a bitmap for our
+        // drawable which we have added.
+        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+
+        // below line is use to add bitmap in our canvas.
+        Canvas canvas = new Canvas(bitmap);
+
+        // below line is use to draw our
+        // vector drawable in canvas.
+        vectorDrawable.draw(canvas);
+
+        // after generating our bitmap we are returning our bitmap.
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 }

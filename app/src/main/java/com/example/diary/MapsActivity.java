@@ -9,6 +9,7 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -54,11 +55,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         longitude = "";
 
         confirmButton.setOnClickListener(view -> {
-            Intent intent = new Intent();
-            intent.putExtra("LATITUDE",latitude);
-            intent.putExtra("LONGITUDE",longitude);
-            setResult(18,intent);
-            MapsActivity.super.onBackPressed();
+            if(latitude.equals("") || longitude.equals(""))
+            {
+                Toast.makeText(this, "Hold long click to choose a place", Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                Intent intent = new Intent();
+                intent.putExtra("LATITUDE",latitude);
+                intent.putExtra("LONGITUDE",longitude);
+                setResult(18,intent);
+                MapsActivity.super.onBackPressed();
+            }
         });
 
     }

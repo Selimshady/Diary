@@ -16,7 +16,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,7 +34,7 @@ import java.util.List;
 public class MemoryPageActivity extends AppCompatActivity {
 
     TextView editTextDate, editLocation, editMainText, editTitle;
-
+    Button editButtonLocation;
     ImageButton confirmButton,shareButton;
 
     View emojiSelection;
@@ -80,8 +79,7 @@ public class MemoryPageActivity extends AppCompatActivity {
                         }
                         if(!editLocation.getText().toString().equals(""))
                         {
-                            editLocation.setEnabled(false);
-                            editLocation.setInputType(InputType.TYPE_NULL);
+                            editButtonLocation.setEnabled(false);
                         }
                     }
                 }
@@ -97,6 +95,7 @@ public class MemoryPageActivity extends AppCompatActivity {
         editMainText = findViewById(R.id.editMemory);
         editLocation = findViewById(R.id.editLocation);
         editTextDate= findViewById(R.id.editTextDate);
+        editButtonLocation = findViewById(R.id.editButtonLocation);
 
         confirmButton = findViewById(R.id.confirmButton);
         shareButton = findViewById(R.id.shareButton);
@@ -229,7 +228,7 @@ public class MemoryPageActivity extends AppCompatActivity {
             startActivity(share);
         });
 
-        editLocation.setOnClickListener(view -> someActivityResultLauncher.launch(new Intent(MemoryPageActivity.this, MapsActivity.class)));
+        editButtonLocation.setOnClickListener(view -> someActivityResultLauncher.launch(new Intent(MemoryPageActivity.this, MapsActivity.class)));
     }
 
     private void finishProcess(int emotion,String newPassword)
@@ -275,10 +274,8 @@ public class MemoryPageActivity extends AppCompatActivity {
 
                 if(!editLocation.getText().toString().equals(""))
                 {
-                    editLocation.setEnabled(false);
-                    editLocation.setInputType(InputType.TYPE_NULL);
+                    editButtonLocation.setEnabled(false);
                 }
-
             }
         } catch (IOException e) {
             e.printStackTrace();

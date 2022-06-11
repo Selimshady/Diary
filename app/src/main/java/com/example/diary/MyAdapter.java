@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +28,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     List<Memory> memories;
     Context context;
     Activity mainActivity;
+
 
     private final Geocoder geocoder;
 
@@ -53,6 +53,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         return new MyViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
         holder.title.setText(memories.get(position).getTitle());
@@ -110,36 +111,39 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         });
     }
 
-    private void share(int position)
+    public void share(int pos)
     {
-        String memo = memories.get(position).getTitle() + "\n";
+        String memo = memories.get(pos).getTitle() + "\n";
         try {
-            List<Address> addresses = geocoder.getFromLocation(Double.parseDouble(memories.get(position).getLatitude()),Double.parseDouble(memories.get(position).getLongitude()),1);
-            if(addresses.size() > 0) {
+            List<Address> addresses = geocoder.getFromLocation(Double.parseDouble(memories.get(pos).getLatitude()), Double.parseDouble(memories.get(pos).getLongitude()), 1);
+            if (addresses.size() > 0) {
                 Address address = addresses.get(0);
-                memo+=address.getCountryName() + "/" + address.getAdminArea() + "\n";
+                memo += address.getCountryName() + "/" + address.getAdminArea() + " - ";
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        memo += memories.get(position).getDate() + "\n" + memories.get(position).getMainText();
+        memo += memories.get(pos).getDate() + "\n" + memories.get(pos).getMainText();
         memo += "\nSent via Diary App";
         Intent share = new Intent(Intent.ACTION_SEND);
         share.setType("text/plain");
-        share.putExtra(Intent.EXTRA_TEXT,memo);
+        share.putExtra(Intent.EXTRA_TEXT, memo);
         context.startActivity(share);
     }
-    private void delete(int position) {
+
+    public void delete(int pos)
+    {
         AppDatabase db;
         db = AppDatabase.getDbInstance(context);
-        db.memoryDao().delete(memories.get(position));
+        db.memoryDao().delete(memories.get(pos));
         setMemories(db.memoryDao().getAllMemories());
     }
 
-        @Override
+    @Override
     public int getItemCount() {
         return memories.size();
     }
+
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
