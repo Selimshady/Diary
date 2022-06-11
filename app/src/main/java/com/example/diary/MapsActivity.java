@@ -45,9 +45,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        assert mapFragment != null;
         mapFragment.getMapAsync(this);
-        geocoder = new Geocoder(getApplicationContext());
+        geocoder = new Geocoder(this);
 
         confirmButton = findViewById(R.id.confirm_location);
 
@@ -88,19 +87,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnMapLongClickListener(this);
         mMap.setOnMarkerDragListener(this);
 
+        LatLng latLng = new LatLng(41.112663,29.021330);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
 
-        List<Address> addressList = null;
-        try {
-            addressList = geocoder.getFromLocationName("İstanbul",1);
-            if(addressList.size() > 0)
-            {
-                Address address = addressList.get(0);
-                LatLng latLng = new LatLng(address.getLatitude(),address.getLongitude());
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

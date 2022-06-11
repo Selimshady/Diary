@@ -5,17 +5,25 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.graphics.pdf.PdfDocument;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
-import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,16 +34,22 @@ import android.widget.Toast;
 import com.example.diary.db.AppDatabase;
 import com.example.diary.db.Memory;
 
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.List;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
 public class MemoryPageActivity extends AppCompatActivity {
 
     TextView editTextDate, editLocation, editMainText, editTitle;
     Button editButtonLocation;
-    ImageButton confirmButton,shareButton;
+    ImageButton confirmButton,shareButton,pdfConverterButton;
 
     View emojiSelection;
     ImageButton sadface,happyface,tiredface,angryface,lovingface;
@@ -57,6 +71,13 @@ public class MemoryPageActivity extends AppCompatActivity {
 
     Geocoder geocoder;
     String longitude,latitude;
+
+
+    // constant code for runtime permissions
+    private static final int PERMISSION_REQUEST_CODE = 200;
+    int pageHeight = 900;
+    int pagewidth = 600;
+
 
     public ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult( // For insert new Row
             new ActivityResultContracts.StartActivityForResult(),
@@ -99,6 +120,7 @@ public class MemoryPageActivity extends AppCompatActivity {
 
         confirmButton = findViewById(R.id.confirmButton);
         shareButton = findViewById(R.id.shareButton);
+        pdfConverterButton = findViewById(R.id.pdfConverter);
 
         emojiSelection = findViewById(R.id.emojiSelection);
         sadface = findViewById(R.id.sad);
@@ -216,7 +238,6 @@ public class MemoryPageActivity extends AppCompatActivity {
             }
         });
 
-
         shareButton.setOnClickListener(view -> {
             String memo = editTitle.getText().toString() + "\n" + editLocation.getText().toString() + " - " + editTextDate.getText().toString() + "\n" +
                     editMainText.getText().toString();
@@ -229,6 +250,134 @@ public class MemoryPageActivity extends AppCompatActivity {
         });
 
         editButtonLocation.setOnClickListener(view -> someActivityResultLauncher.launch(new Intent(MemoryPageActivity.this, MapsActivity.class)));
+
+        pdfConverterButton.setOnClickListener(view -> {
+            if (checkPermission()) {
+                Toast.makeText(view.getContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
+                generatePDF();
+            } else {
+                requestPermission();
+            }
+        });
+    }
+
+    private void generatePDF() {
+        // creating an object variable
+        // for our PDF document.
+        PdfDocument pdfDocument = new PdfDocument();
+
+        // two variables for paint "paint" is used
+        // for drawing shapes and we will use "title"
+        // for adding text in our PDF file.
+        Paint title = new Paint();
+
+        // we are adding page info to our PDF file
+        // in which we will be passing our pageWidth,
+        // pageHeight and number of pages and after that
+        // we are calling it to create our PDF.
+        PdfDocument.PageInfo mypageInfo = new PdfDocument.PageInfo.Builder(pagewidth, pageHeight, 1).create();
+
+        // below line is used for setting
+        // start page for our PDF file.
+        PdfDocument.Page myPage = pdfDocument.startPage(mypageInfo);
+
+        // creating a variable for canvas
+        // from our page of PDF.
+        Canvas canvas = myPage.getCanvas();
+
+
+        // below line is used for adding typeface for
+        // our text which we will be adding in our PDF file.
+        title.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
+
+        // below line is used for setting text size
+        // which we will be displaying in our PDF file.
+        title.setTextSize(15);
+
+        // below line is sued for setting color
+        // of our text inside our PDF file.
+        title.setColor(ContextCompat.getColor(this, R.color.black));
+
+        // below line is used to draw text in our PDF file.
+        // the first parameter is our text, second parameter
+        // is position from start, third parameter is position from top
+        // and then we are passing our variable of paint which is title.
+        canvas.drawText(editTitle.getText().toString(), 250, 100, title);
+        canvas.drawText(editTextDate.getText().toString(),400,125,title);
+        canvas.drawText(editLocation.getText().toString(), 400, 150, title);
+
+        // similarly we are creating another text and in this
+        // we are aligning this text to center of our PDF file.
+        title.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+        title.setColor(ContextCompat.getColor(this, R.color.purple_200));
+        title.setTextSize(15);
+
+        // below line is used for setting
+        // our text to center of PDF.
+        title.setTextAlign(Paint.Align.LEFT);
+        canvas.drawText(editMainText.getText().toString(), 50, 200, title);
+
+        // after adding all attributes to our
+        // PDF file we will be finishing our page.
+        pdfDocument.finishPage(myPage);
+
+        // below line is used to set the name of
+        // our PDF file and its path.
+        String top = editTitle.getText().toString() + ".pdf";
+        if(top.equals(""))
+            top = "empty.pdf";
+        File file = new File(getExternalFilesDir(null), top);
+
+        try {
+            // after creating a file name we will
+            // write our PDF file to that location.
+            pdfDocument.writeTo(new FileOutputStream(file));
+            Log.e("geldi","geldi");
+
+            // below line is to print toast message
+            // on completion of PDF generation.
+            Toast.makeText(this, "PDF file generated successfully.", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            // below line is used
+            // to handle error
+            e.printStackTrace();
+        }
+        // after storing our pdf to that
+        // location we are closing our PDF file.
+        pdfDocument.close();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0) {
+
+                // after requesting permissions we are showing
+                // users a toast message of permission granted.
+                boolean writeStorage = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                boolean readStorage = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+
+                if (writeStorage && readStorage) {
+                    Toast.makeText(this, "Permission Granted..", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Permission Denined.", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+        }
+    }
+
+    private void requestPermission() {
+        // requesting permissions if not provided.
+        ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+    }
+
+    private boolean checkPermission() {
+        // checking of permissions.
+        int permission1 = ContextCompat.checkSelfPermission(getApplicationContext(), WRITE_EXTERNAL_STORAGE);
+        int permission2 = ContextCompat.checkSelfPermission(getApplicationContext(), READ_EXTERNAL_STORAGE);
+        return permission1 == PackageManager.PERMISSION_GRANTED && permission2 == PackageManager.PERMISSION_GRANTED;
     }
 
     private void finishProcess(int emotion,String newPassword)
